@@ -8,6 +8,5 @@
 
 using namespace std;
 
-int parse_file(char *file, int (*)(stringstream &, char *));
 bool is_string_num(string s);
 #endif

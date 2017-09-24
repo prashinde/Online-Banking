@@ -12,11 +12,12 @@ c_CXX_SRCS := $(foreach idir, $(c_INCLUDE_DIRS), $(wildcard $(idir)/*.cpp))
 c_CXX_OBJS := ${c_CXX_SRCS:.cpp=.o}
 c_OBJS := $(c_CXX_OBJS)
 
+cs_LIBRARIES := pthread
 
 CPPFLAGS += $(foreach includedir,$(s_INCLUDE_DIRS),-I$(includedir))
 CPPFLAGS += $(foreach includedir,$(c_INCLUDE_DIRS),-I$(includedir))
 #LDFLAGS += $(foreach librarydir,$(program_LIBRARY_DIRS),-L$(librarydir))
-#LDFLAGS += $(foreach library,$(program_LIBRARIES),-l$(library))
+LDFLAGS += $(foreach library,$(cs_LIBRARIES),-$(library))
 
 .PHONY: all clean distclean
 

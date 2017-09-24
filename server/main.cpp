@@ -24,7 +24,7 @@ static void print_cust_rec(cr_rec_t *rec, char *f)
 	cr_log << "---------------------------------------------------------------" << endl;
 }
 
-int server_parse(stringstream &ss, char *f)
+int parse_line(stringstream &ss, char *f)
 {
 	string s;
 	int i = 0;
@@ -49,7 +49,7 @@ int server_parse(stringstream &ss, char *f)
 			break;
 
 			case 2:
-			rec->cr_name = s;	
+			rec->cr_name = s;
 			break;
 
 			case 3:
@@ -75,10 +75,37 @@ int server_parse(stringstream &ss, char *f)
 	return 0;
 }
 
+int parse_file(char *file)
+{
+	int      rc;
+	ifstream fs;
+	string   line;
+
+	fs.open(file);
+	if(fs.fail()) {
+		rc = errno;
+		cr_log << "Unable to open file:" << rc <<endl; 
+		return rc;
+	}
+
+	while(getline(fs, line)) {
+		if(fs.bad()) {
+			rc = errno;
+			fs.close();
+			cr_log << "Error reading from a file: " << errno << endl;
+			return rc;
+		}
+		stringstream ss(line);
+		parse_line(ss, file);
+	}
+	fs.close();
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	int rc;
-	rc = parse_file(argv[1], server_parse);
+	rc = parse_file(argv[1]);
 	if(rc != 0) {
 		cout << "Error parsing a file" << endl;
 		return rc;
