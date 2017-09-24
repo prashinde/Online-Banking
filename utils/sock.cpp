@@ -1,14 +1,4 @@
-#include "client.h"
-/*class c_sock {
-	struct sockaddr_in server_addr;
-	int sock;
-public:
-	int c_sock_addr(char *ip, int port);
-	int c_sock_connect();
-	int c_sock_read(char *buffer, size_t len);
-	int c_sock_write(char *buffer, size_t len);
-	void c_sock_close();
-};*/
+#include "sock.h"
 
 int c_sock :: c_sock_addr(char *ip, int port)
 {
@@ -45,6 +35,35 @@ int c_sock::c_sock_connect()
 	return 0;
 }
 
+int c_sock :: c_sock_bind()
+{
+	int rc;
+
+	rc = bind(this->sock, (struct sockaddr *)&(this->server_addr), sizeof(this->server_addr));
+	if(rc < 0) {
+		cr_log << "Bind failed.:" << errno << endl;
+		return rc;
+	}
+	return 0;
+}
+
+int c_sock :: c_sock_listen()
+{
+	listen(this->sock, 10);
+}
+
+int c_sock :: c_sock_accept()
+{
+	this->addrlen = sizeof(this->cli_addr);
+	this->cl_sock = accept(this->sock, (struct sockaddr *)&this->cli_addr, &this->addrlen);
+	if(this->cl_sock < 0) {
+		cr_log << "Unable to accept the connection:" << errno << endl;
+		return errno;
+	}
+
+	return 0;
+}
+
 ssize_t c_sock::c_sock_read(void *buffer, size_t len)
 {
 	return recv(this->sock, buffer, len, 0);
@@ -53,6 +72,16 @@ ssize_t c_sock::c_sock_read(void *buffer, size_t len)
 ssize_t c_sock::c_sock_write(void *buffer, size_t len)
 {
 	return send(this->sock, buffer, len, 0);
+}
+
+ssize_t c_sock::c_sock_read(int fd, void *buffer, size_t len)
+{
+	return recv(fd, buffer, len, 0);
+}
+
+ssize_t c_sock::c_sock_write(int fd, void *buffer, size_t len)
+{
+	return send(fd, buffer, len, 0);
 }
 
 void c_sock::c_sock_close()

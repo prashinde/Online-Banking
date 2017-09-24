@@ -16,6 +16,8 @@ cs_LIBRARIES := pthread
 
 CPPFLAGS += $(foreach includedir,$(s_INCLUDE_DIRS),-I$(includedir))
 CPPFLAGS += $(foreach includedir,$(c_INCLUDE_DIRS),-I$(includedir))
+CPPFLAGS += -g
+
 #LDFLAGS += $(foreach librarydir,$(program_LIBRARY_DIRS),-L$(librarydir))
 LDFLAGS += $(foreach library,$(cs_LIBRARIES),-$(library))
 
@@ -25,6 +27,7 @@ all: BIN_DIR $(EXEC)
 
 BIN_DIR: ${BIN_DIR}
 ${BIN_DIR}:
+	@echo $(CPPFLAGS)
 	${MKDIR_P} ${BIN_DIR}
 
 server: $(s_OBJS)

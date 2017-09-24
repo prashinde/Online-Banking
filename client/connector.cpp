@@ -15,8 +15,8 @@ int start_transactions(c_queue *q, c_sock *ns)
 	char buf[256];
 	while(1) {
 		c_trans_t *t = q->remove_trans();
-		ns->c_sock_write((void *)t, sizeof(t));
-		ns->c_sock_read((void *)buf, 256);
+		ns->c_sock_write((void *)t, sizeof(c_trans_t));
+		//ns->c_sock_read((void *)buf, 256);
 		cr_log<<"Transaction:" << t->ct_id << " " << buf << endl;
 	}
 	return 0;

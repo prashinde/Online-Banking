@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <utility>
+#include <unordered_map>
 #include <string>
 #include <iostream>
 
@@ -11,105 +13,89 @@
 
 using namespace std;
 
-static unsigned long g_cust = 0;
-
-static void print_cust_rec(cr_rec_t *rec, char *f)
+void print_map(unordered_map<unsigned long, cr_rec_t *> &m)
 {
-	cr_log << "---------------------------------------------------------------" << endl;
-	cr_log << "Customer details:" << f << endl;
-	cr_log << "Customer id: " << rec->cr_id << endl;
-	cr_log << "Account num:" << rec->cr_account_nr << endl;
-	cr_log << "Name :" << rec->cr_name << endl;
-	cr_log << "Balance :" << rec->cr_balance << endl;
-	cr_log << "---------------------------------------------------------------" << endl;
+	for(auto it = m.begin(); it != m.end(); ++it ) {
+		cout << " " << it->first << ":" << it->second;
+		cout << endl;
+	}
 }
 
-int parse_line(stringstream &ss, char *f)
+
+c_sock *listener(char *ip, int port)
 {
-	string s;
-	int i = 0;
+	int rc;
 
-	cr_rec_t *rec = new cr_rec_t;
-	if(rec == NULL) {
-		cr_log << "Out of memory!" << endl;
-		return -ENOMEM;
+	c_sock *ns = new c_sock;
+	if(ns == NULL) {
+		cr_log<<"Unable to open a socket:" << endl;
+		return ns;
 	}
 
-	while(getline(ss, s, ' ')) {
-		i++;
-		switch(i) {
-			case 1:
-			if(is_string_num(s)) {
-				cr_log << "Record corrupted" << endl;
-				delete rec;
-				return -EINVAL;
-			}
-
-			rec->cr_account_nr = stol(s, NULL);
-			break;
-
-			case 2:
-			rec->cr_name = s;
-			break;
-
-			case 3:
-			if(is_string_num(s)) {
-				cr_log << "Record corrupted" << endl;
-				delete rec;
-				return -EINVAL;
-			}
-			rec->cr_balance = stol(s, NULL);
-			break;
-
-			default:
-			cr_log << "Record corrupted" << endl;
-			delete rec;
-			return -EINVAL;
-			break;
-		}
+	rc = ns->c_sock_addr(ip, port);
+	if(rc != 0) {
+		delete ns;
+		cr_log << "Invalid Addresses" << endl;
+		return NULL;
 	}
 
-	rec->cr_id = g_cust; 
-	print_cust_rec(rec, f);
-	g_cust++;
-	return 0;
-}
-
-int parse_file(char *file)
-{
-	int      rc;
-	ifstream fs;
-	string   line;
-
-	fs.open(file);
-	if(fs.fail()) {
-		rc = errno;
-		cr_log << "Unable to open file:" << rc <<endl; 
-		return rc;
+	rc = ns->c_sock_bind();
+	if(rc < 0) {
+		delete ns;
+		cr_log << "Unable to bind" << endl;
+		return NULL;
 	}
 
-	while(getline(fs, line)) {
-		if(fs.bad()) {
-			rc = errno;
-			fs.close();
-			cr_log << "Error reading from a file: " << errno << endl;
-			return rc;
-		}
-		stringstream ss(line);
-		parse_line(ss, file);
-	}
-	fs.close();
-	return 0;
+	ns->c_sock_listen();
+
+	return ns;
 }
 
 int main(int argc, char *argv[])
 {
+
 	int rc;
-	rc = parse_file(argv[1]);
-	if(rc != 0) {
-		cout << "Error parsing a file" << endl;
+
+	/* Spawn a thread to build database. */
+	promise<unordered_map<unsigned long, cr_rec_t *>> p;
+	auto f = p.get_future();
+
+	thread t1(parse_file, argv[1], move(p));
+	/* While t1 is building DB, let's complete bookkeeping for socket */
+	c_sock *ns = listener(argv[2], atoi(argv[3]));
+	if(ns == NULL) {
+		cr_log << "unable to listen on a socket" << endl;
+		t1.join();
 		return rc;
 	}
 
+	/* Before falling through a dreadful blackhole, make sure
+	 * databse is built succefully.
+	 */
+	t1.join();
+	unordered_map<unsigned long, cr_rec_t*> m = f.get();
+	if(m.empty()) {
+		cr_log << "Database built error" << endl;
+		ns->c_sock_close();
+		delete ns;
+		return -1;
+	}
+
+	/*
+	 * Now we have at least few records to process.
+	 * Accept connections from socket.
+	 */
+	while(1) {
+		rc = ns->c_sock_accept();
+		if(rc != 0) {
+			cr_log << "Socket not connected:" << errno << endl;
+			return rc;
+		}
+		int fd = ns->get_cl_sock();
+		thread(transaction, ns, fd, m).detach();
+	}
+
+	ns->c_sock_close();
+	delete ns;
 	return 0;
 }
