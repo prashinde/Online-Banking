@@ -108,6 +108,8 @@ void parse_file(char *file, c_queue *q)
 		stringstream ss(line);
 		parse_line(ss, file, q);
 	}
+
+	
 	fs.close();
 	return ;
 }
