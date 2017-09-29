@@ -46,6 +46,7 @@ void transaction(c_sock *ns, int fd, unordered_map<unsigned long, cr_rec_t *> ma
 
 		if(t->ct_timestamp == (0UL-1UL)) {
 			cr_log << "Connection closing" << endl;
+			delete t;
 			break;
 		}
 
@@ -55,7 +56,7 @@ void transaction(c_sock *ns, int fd, unordered_map<unsigned long, cr_rec_t *> ma
 			t->ct_status = NOT_CUST;
 			cr_log << "Record does not exist..:" <<  t->ct_acc_num << endl;
 			delete t;
-			return ;
+			continue;
 		}
 
 		CT(t, got->second);

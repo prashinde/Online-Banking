@@ -6,12 +6,12 @@
 #a4=`cut -d " " -f4 ./f`; echo $a4;
 
 u="$1"
-for ((i=0; i<$u; i++))
+for i in `seq 1 $u`
 do
 	td=`shuf -i 1-5 -n 1`;
 	a1=$((a1+td));
 
-	acc=`shuf -i 100-10000 -n 1`;
+	acc=`shuf -i 100-110 -n 1`;
 
 	optype=`shuf -i 0-1 -n 1`;
 	if [ $optype == 0 ]

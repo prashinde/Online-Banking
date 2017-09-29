@@ -55,12 +55,15 @@ int main(int argc, char *argv[])
 {
 
 	int rc;
+	int rate, sec;
+
+    	ios_base::sync_with_stdio(false); 
+	setiosflags(ios::fixed);
+	setprecision(2);
 
 	/* Spawn a thread to build database. */
 	promise<unordered_map<unsigned long, cr_rec_t *>> p;
 	auto f = p.get_future();
-
-    	ios_base::sync_with_stdio(false); 
 
 	thread t1(parse_file, argv[1], move(p));
 	/* While t1 is building DB, let's complete bookkeeping for socket */
@@ -83,6 +86,10 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	rate = atoi(argv[4]);
+	sec = atoi(argv[5]);
+	/* Interest calculator thread */
+	thread(interest_calc, rate, sec, m).detach();
 	/*
 	 * Now we have at least few records to process.
 	 * Accept connections from socket.

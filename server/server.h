@@ -9,6 +9,7 @@
 #include <utility>
 #include <unordered_map>
 #include <string>
+#include <iomanip>
 #include <iostream>
 
 #include "server.h"
@@ -21,7 +22,7 @@ using namespace std;
 typedef struct customer_record {
 	unsigned long cr_id;
 	unsigned long cr_account_nr;
-	unsigned long cr_balance;
+	double        cr_balance;
 	string        cr_name;
 	mutex         cr_mx;
 } cr_rec_t;
@@ -29,4 +30,5 @@ typedef struct customer_record {
 void parse_file(char *file, promise<unordered_map<unsigned long, cr_rec_t *>> && map);
 int parse_line(stringstream &ss, char *f, unordered_map<unsigned long, cr_rec_t *> &map);
 void transaction(c_sock *ns, int fd, unordered_map<unsigned long, cr_rec_t *> map);
+int interest_calc(int rate, int sec, unordered_map<unsigned long, cr_rec_t*> m);
 #endif

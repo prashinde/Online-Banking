@@ -47,7 +47,7 @@ int parse_line(stringstream &ss, char *f, unordered_map<unsigned long, cr_rec_t 
 				delete rec;
 				return -EINVAL;
 			}
-			rec->cr_balance = stol(s, NULL);
+			rec->cr_balance = stod(s, NULL);
 			break;
 
 			default:
