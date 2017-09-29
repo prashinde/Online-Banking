@@ -13,6 +13,18 @@ using namespace std;
 
 static unsigned long g_trans = 0;
 
+c_trans_t *cr_dummy()
+{
+	c_trans_t *trans = new c_trans_t;
+	if(trans == NULL) {
+		cr_log << "Unevitable occurs" << endl;
+		return NULL;
+	}
+
+	trans->ct_timestamp = (0UL-1UL);
+	return trans;
+}
+
 int parse_line(stringstream &ss, char *f, c_queue *q)
 {
 	string s;
@@ -80,6 +92,7 @@ int parse_line(stringstream &ss, char *f, c_queue *q)
 	}
 
 	trans->ct_id = g_trans;
+	print_trans(trans, nullptr);
 	q->insert_trans(trans);
 	g_trans++;
 	return 0;
@@ -108,8 +121,11 @@ void parse_file(char *file, c_queue *q)
 		stringstream ss(line);
 		parse_line(ss, file, q);
 	}
-
 	
+	if(fs.eof()) {
+		q->insert_trans(cr_dummy());
+	}
+
 	fs.close();
 	return ;
 }

@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
 	promise<unordered_map<unsigned long, cr_rec_t *>> p;
 	auto f = p.get_future();
 
+    	ios_base::sync_with_stdio(false); 
+
 	thread t1(parse_file, argv[1], move(p));
 	/* While t1 is building DB, let's complete bookkeeping for socket */
 	c_sock *ns = listener(argv[2], atoi(argv[3]));

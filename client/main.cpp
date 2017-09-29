@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
 
 	maxq = atoi(argv[2]);
 
+    	ios_base::sync_with_stdio(false); 
 	Q = new c_queue(maxq);
 	if(Q == nullptr) {
 		cr_log << "Client ran out of memory!" << endl;
