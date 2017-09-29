@@ -11,7 +11,6 @@ void CT(c_trans_t *t, cr_rec_t *r)
 			return ;
 		}
 		r->cr_balance -= t->ct_amount;
-
 	} else if(t->ct_op == DEPOSIT) {
 		r->cr_balance += t->ct_amount;
 	} else {
@@ -30,6 +29,8 @@ void transaction(c_sock *ns, int fd, unordered_map<unsigned long, cr_rec_t *> ma
 		c_trans_t *t = new c_trans_t;
 
 		ssize_t exp = sizeof(c_trans_t);
+
+		cr_log << "About to read from socket" << endl;
 		ssize_t ret = ns->c_sock_read(fd, (void *)t, sizeof(c_trans_t));
 		if(ret == -1) {
 			cr_log << "Error on socket read:" << errno << endl;
@@ -37,7 +38,7 @@ void transaction(c_sock *ns, int fd, unordered_map<unsigned long, cr_rec_t *> ma
 			continue;
 		}
 
-		cout << "RET is: " << ret << endl;
+		cr_log << "Read from socket success" << endl;
 		if(ret != sizeof(c_trans_t)) {
 			cr_log << "Partial read. Do something:" << endl;
 			delete t;
@@ -50,6 +51,7 @@ void transaction(c_sock *ns, int fd, unordered_map<unsigned long, cr_rec_t *> ma
 			break;
 		}
 
+		cr_log << "Not last recoed" << endl;
 		print_trans(t, nullptr);
 		unordered_map<unsigned long, cr_rec_t *>::const_iterator got = map.find(t->ct_acc_num);
 		if(got == map.end()) {
@@ -58,8 +60,16 @@ void transaction(c_sock *ns, int fd, unordered_map<unsigned long, cr_rec_t *> ma
 			delete t;
 			continue;
 		}
+		cr_log << "Record exist" << endl;
 
 		CT(t, got->second);
+		cr_log << "Transaction done writing to socket" << endl;
+		ret = ns->c_sock_write(fd, (void *)t, sizeof(c_trans_t));
+		if(ret == -1) {
+			cr_log << "Error on socket read:" << errno << endl;
+			delete t;
+			continue;
+		}
 		delete t;
 	}
 }

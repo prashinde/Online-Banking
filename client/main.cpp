@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
 	int           rc;
 	unsigned int  maxq;
 	c_queue      *Q;
+	int rate;
 
 	maxq = atoi(argv[2]);
 
@@ -27,7 +28,10 @@ int main(int argc, char *argv[])
 	}
 
 	thread t1(parse_file, argv[1], Q);
-	thread t2(connector, Q, argv[3], atoi(argv[4]));
+
+	/* Client will generate requests at the rate. */
+	rate = atoi(argv[5]);
+	thread t2(connector, Q, argv[3], atoi(argv[4]), rate);
 	t1.join();
 	t2.join();
 	delete Q;

@@ -25,5 +25,5 @@ public:
 
 
 void parse_file(char *file, c_queue *q);
-void connector(c_queue *q, char *ip, int port);
+void connector(c_queue *q, char *ip, int port, int rate);
 #endif
