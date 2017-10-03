@@ -31,4 +31,5 @@ void parse_file(char *file, promise<unordered_map<unsigned long, cr_rec_t *>> &&
 int parse_line(stringstream &ss, char *f, unordered_map<unsigned long, cr_rec_t *> &map);
 void transaction(c_sock *ns, int fd, unordered_map<unsigned long, cr_rec_t *> map);
 int interest_calc(int rate, int sec, unordered_map<unsigned long, cr_rec_t*> m);
+void CT(trans_t *t, cr_rec_t *r);
 #endif

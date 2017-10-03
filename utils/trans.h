@@ -7,6 +7,12 @@
 enum operation {
 	WITHDRAW = 1,
 	DEPOSIT,
+	INTEREST,
+};
+
+enum evt_type {
+	SERVER = 1,
+	CLIENT,
 };
 
 enum trans_st {
@@ -15,6 +21,10 @@ enum trans_st {
 	NOT_CUST = -3,
 };
 
+/*
+ * Hanldes client side events.
+ * withdrawl, deposit etc.
+ */
 typedef struct client_trans {
 	unsigned long  ct_id;
 	unsigned long  ct_timestamp;
@@ -23,6 +33,23 @@ typedef struct client_trans {
 	unsigned long  ct_amount;
 	int            ct_status; /* Server sets the flag. */
 } c_trans_t;
+
+/*
+ * Handles server side events,
+ * interest rate, late fees, overdraft fees.
+ */
+typedef struct server_trans {
+	int            st_rate;
+	enum operation st_op;
+} s_trans_t;
+
+typedef struct transaction {
+	enum evt_type e_t;
+	union {
+		c_trans_t *t_u_ct;
+		s_trans_t *t_u_st;
+	} u;
+} trans_t;
 
 void print_trans(c_trans_t *trans, char *f);
 #endif
