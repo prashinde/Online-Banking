@@ -5,7 +5,8 @@ port=$2
 rate=$3
 
 GRAPH_DIR=graph
-for i in {1..3};
+rm -rf ../$GRAPH_DIR
+for i in {1..4};
 do
 	rm -rf ../log/*
 	for j in `seq 1 $i`
@@ -31,4 +32,6 @@ do
 
 	avgtime=$(echo "scale=8;$avgtime/$i"|bc)
 	printf "%d %08.8f\n" "$i" "$avgtime" >> ../$GRAPH_DIR/graph.plot
+	cd ../$GRAPH_DIR/.
 done
+gnuplot -e "plot 'graph.plot' with lines; pause -1"

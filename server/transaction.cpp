@@ -97,7 +97,7 @@ void *transaction(void *ctx)
 		}
 
 		if(t->ct_timestamp == (0UL-1UL)) {
-			cr_log << "Connection closing" << endl;
+			cr_log << "Connection closing fd:" << fd << endl;
 			delete t;
 			break;
 		}
@@ -136,5 +136,6 @@ void *transaction(void *ctx)
 		delete t;
 	}
 
+	close(fd);
 	return NULL;
 }
