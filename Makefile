@@ -12,13 +12,13 @@ c_CXX_SRCS := $(foreach idir, $(c_INCLUDE_DIRS), $(wildcard $(idir)/*.cpp))
 c_CXX_OBJS := ${c_CXX_SRCS:.cpp=.o}
 c_OBJS := $(c_CXX_OBJS)
 
-cs_LIBRARIES := pthread
+cs_LIBRARIES := -lpthread
 
 CPPFLAGS += $(foreach includedir,$(s_INCLUDE_DIRS),-I$(includedir))
 CPPFLAGS += $(foreach includedir,$(c_INCLUDE_DIRS),-I$(includedir))
-CPPFLAGS += -g
-
-#LDFLAGS += $(foreach librarydir,$(program_LIBRARY_DIRS),-L$(librarydir))
+CPPFLAGS += -g $(cs_LIBRARIES)
+CC = g++
+LDFLAGS += $(foreach librarydir,$(program_LIBRARY_DIRS),-L$(librarydir))
 LDFLAGS += $(foreach library,$(cs_LIBRARIES),-$(library))
 
 .PHONY: all clean distclean
@@ -27,14 +27,15 @@ all: BIN_DIR $(EXEC)
 
 BIN_DIR: ${BIN_DIR}
 ${BIN_DIR}:
-	@echo $(CPPFLAGS)
+	@echo $(CPPFLAGS) $(cs_LIBRARIES)
+	@echo $(cs_LIBRARIES)
 	${MKDIR_P} ${BIN_DIR}
 
 server: $(s_OBJS)
-	$(LINK.cc) $(s_OBJS) -o $(BIN_DIR)/$@
+	$(CC) $(s_OBJS) -o $(BIN_DIR)/$@ $(cs_LIBRARIES)
 
 client: $(c_OBJS)
-	$(LINK.cc) $(c_OBJS) -o $(BIN_DIR)/$@
+	$(CC) $(c_OBJS) -o $(BIN_DIR)/$@ $(cs_LIBRARIES)
 
 clean:
 	${foreach t, ${EXEC},$(RM) $(BIN_DIR)/$(t)}

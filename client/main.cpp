@@ -27,13 +27,38 @@ int main(int argc, char *argv[])
 		return -ENOMEM;
 	}
 
-	thread t1(parse_file, argv[1], Q);
+	read_ctx_t *r_ctx = new read_ctx_t;
+	if(r_ctx == NULL) {
+		cr_log << "Unable to creat reader context." << endl;
+		delete Q;
+		return -ENOMEM;
+	}
+
+	r_ctx->filename = argv[1];
+	r_ctx->Q = Q;
+	thread t1(parse_file, r_ctx);
 
 	/* Client will generate requests at the rate. */
 	rate = atoi(argv[5]);
-	thread t2(connector, Q, argv[3], atoi(argv[4]), rate);
+
+	writer_ctx_t *w_ctx = new writer_ctx_t;
+	if(w_ctx == NULL) {
+		cr_log << "Unable to creat writer context." << endl;
+		t1.join();
+		delete r_ctx;
+		delete Q;
+		return -ENOMEM;
+	}
+
+	w_ctx->Q = Q;
+	w_ctx->rate = rate;
+	w_ctx->ip_addr = argv[3];
+	w_ctx->port = atoi(argv[4]);
+	thread t2(connector, w_ctx);
 	t1.join();
 	t2.join();
+	delete r_ctx;
+	delete w_ctx;
 	delete Q;
 	return 0;
 }

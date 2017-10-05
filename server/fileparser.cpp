@@ -13,7 +13,7 @@ static void print_cust_rec(cr_rec_t *rec, char *f)
 	cr_log << "---------------------------------------------------------------" << endl;
 }
 
-int parse_line(stringstream &ss, char *f, unordered_map<unsigned long, cr_rec_t *> &map)
+int parse_line(stringstream &ss, char *f, unordered_map<unsigned long, cr_rec_t *> *map)
 {
 	string s;
 	int i = 0;
@@ -59,23 +59,22 @@ int parse_line(stringstream &ss, char *f, unordered_map<unsigned long, cr_rec_t 
 	}
 
 	rec->cr_id = g_cust;
-	map.insert(make_pair(rec->cr_account_nr, rec));
+	map->insert(make_pair(rec->cr_account_nr, rec));
 	print_cust_rec(rec, f);
 	g_cust++;
 	return 0;
 }
 
-void parse_file(char *file, promise<unordered_map<unsigned long, cr_rec_t *>> &&m)
+void parse_file(char *file, unordered_map<unsigned long, cr_rec_t *> *map)
 {
 	int      rc;
 	ifstream fs;
 	string   line;
-	unordered_map<unsigned long, cr_rec_t*> map;
 
 	fs.open(file);
 	if(fs.fail()) {
 		rc = errno;
-		cr_log << "Unable to open file:" << rc <<endl;
+		cr_log << "Unable to open file:" << rc << ": " << file <<endl;
 		return ;
 	}
 
@@ -90,6 +89,5 @@ void parse_file(char *file, promise<unordered_map<unsigned long, cr_rec_t *>> &&
 		parse_line(ss, file, map);
 	}
 	fs.close();
-	m.set_value(map);
 	return ;
 }

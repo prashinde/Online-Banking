@@ -27,9 +27,21 @@ typedef struct customer_record {
 	mutex         cr_mx;
 } cr_rec_t;
 
-void parse_file(char *file, promise<unordered_map<unsigned long, cr_rec_t *>> && map);
-int parse_line(stringstream &ss, char *f, unordered_map<unsigned long, cr_rec_t *> &map);
-void transaction(c_sock *ns, int fd, unordered_map<unsigned long, cr_rec_t *> map);
-int interest_calc(int rate, int sec, unordered_map<unsigned long, cr_rec_t*> m);
+typedef struct interest_thread_ctx {
+	int rate;
+	int sec;
+	unordered_map<unsigned long, cr_rec_t*> *map;
+} int_thread_ctx_t;
+
+typedef struct connector_thread_ctx {
+	c_sock *ns;
+	int fd;
+	unordered_map<unsigned long, cr_rec_t*> *map;
+} con_thread_ctx_t;
+
+void parse_file(char *file, unordered_map<unsigned long, cr_rec_t *> *map);
+int parse_line(stringstream &ss, char *f, unordered_map<unsigned long, cr_rec_t *> *map);
+void *transaction(void *arg);
+void *interest_calc(void *arg);
 void CT(trans_t *t, cr_rec_t *r);
 #endif

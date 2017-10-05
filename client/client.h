@@ -4,6 +4,8 @@
 #include <thread>
 #include <queue>
 #include <mutex>
+#include <iostream>
+#include <fstream>
 #include <condition_variable>
 
 #include "sock.h"
@@ -23,7 +25,17 @@ public:
 	c_trans_t *remove_trans();
 };
 
+typedef struct reader_ctx {
+	char    *filename;
+	c_queue *Q;
+} read_ctx_t;
 
-void parse_file(char *file, c_queue *q);
-void connector(c_queue *q, char *ip, int port, int rate);
+typedef struct writer_ctx {
+	c_queue *Q;
+	int rate;
+	char *ip_addr;
+	int port;
+} writer_ctx_t;
+void *parse_file(void *arg);
+void *connector(void *arg);
 #endif

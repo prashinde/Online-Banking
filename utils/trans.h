@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
 #define MIN_FUND 0
 enum operation {
 	WITHDRAW = 1,
@@ -31,6 +32,9 @@ typedef struct client_trans {
 	unsigned long  ct_acc_num;
 	enum operation ct_op;
 	unsigned long  ct_amount;
+	/* Output parameters */
+	double         ct_o_balance;
+	double         ct_n_balance;
 	int            ct_status; /* Server sets the flag. */
 } c_trans_t;
 
@@ -41,6 +45,10 @@ typedef struct client_trans {
 typedef struct server_trans {
 	int            st_rate;
 	enum operation st_op;
+	/* Output parameters */
+	double         st_o_balance;
+	double         st_n_balance;
+	int            st_status;
 } s_trans_t;
 
 typedef struct transaction {
@@ -52,4 +60,5 @@ typedef struct transaction {
 } trans_t;
 
 void print_trans(c_trans_t *trans, char *f);
+string op_str(enum operation op);
 #endif

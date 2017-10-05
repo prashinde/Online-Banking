@@ -98,17 +98,21 @@ int parse_line(stringstream &ss, char *f, c_queue *q)
 	return 0;
 }
 
-void parse_file(char *file, c_queue *q)
+void *parse_file(void *arg)
 {
 	int      rc;
 	ifstream fs;
 	string   line;
 
+	read_ctx_t *ctx = (read_ctx_t *)arg;
+	char *file = ctx->filename;
+	c_queue *q = ctx->Q;
+
 	fs.open(file);
 	if(fs.fail()) {
 		rc = errno;
 		cr_log << "Unable to open file:" << rc <<endl; 
-		return ;
+		return NULL;
 	}
 
 	while(getline(fs, line)) {
@@ -116,7 +120,7 @@ void parse_file(char *file, c_queue *q)
 			rc = errno;
 			fs.close();
 			cr_log << "Error reading from a file: " << errno << endl;
-			return ;
+			return NULL;
 		}
 		stringstream ss(line);
 		parse_line(ss, file, q);
@@ -127,5 +131,5 @@ void parse_file(char *file, c_queue *q)
 	}
 
 	fs.close();
-	return ;
+	return NULL;
 }

@@ -57,39 +57,43 @@ int main(int argc, char *argv[])
 	int rc;
 	int rate, sec;
 
+	unordered_map<unsigned long, cr_rec_t*> *map;
     	ios_base::sync_with_stdio(false); 
 	setiosflags(ios::fixed);
 	setprecision(2);
 
-	/* Spawn a thread to build database. */
-	promise<unordered_map<unsigned long, cr_rec_t *>> p;
-	auto f = p.get_future();
+	map = new unordered_map<unsigned long, cr_rec_t*>;
+	if(map == NULL) {
+		cr_log << "Database built error" << endl;
+		return -1;
+	}
 
-	thread t1(parse_file, argv[1], move(p));
+	parse_file(argv[1], map);
+	if(map->empty()) {
+		cr_log << "Database built error" << endl;
+		return -1;
+	}
+
 	/* While t1 is building DB, let's complete bookkeeping for socket */
 	c_sock *ns = listener(argv[2], atoi(argv[3]));
 	if(ns == NULL) {
 		cr_log << "unable to listen on a socket" << endl;
-		t1.join();
 		return rc;
 	}
-
-	/* Before falling through a dreadful blackhole, make sure
-	 * databse is built succefully.
-	 */
-	t1.join();
-	unordered_map<unsigned long, cr_rec_t*> m = f.get();
-	if(m.empty()) {
-		cr_log << "Database built error" << endl;
-		ns->c_sock_close();
-		delete ns;
-		return -1;
-	}
-
+	
 	rate = atoi(argv[4]);
 	sec = atoi(argv[5]);
 	/* Interest calculator thread */
-	thread(interest_calc, rate, sec, m).detach();
+	int_thread_ctx_t *ctx = new int_thread_ctx_t;
+	if(ctx == NULL) {
+		cr_log << "Unable to allocate memory" << endl;
+		delete ns;
+	}
+
+	ctx->rate = rate;
+	ctx->sec = sec;
+	ctx->map = map;
+	thread int_thread(interest_calc, ctx);
 	/*
 	 * Now we have at least few records to process.
 	 * Accept connections from socket.
@@ -101,10 +105,20 @@ int main(int argc, char *argv[])
 			return rc;
 		}
 		int fd = ns->get_cl_sock();
-		thread(transaction, ns, fd, m).detach();
+		con_thread_ctx_t *ctx = new con_thread_ctx_t;
+		if(ctx == NULL) {
+			/* Handle, retry */
+		}
+
+		ctx->ns = ns;
+		ctx->fd = fd;
+		ctx->map = map;
+		thread t1(transaction, ctx);
+		t1.detach();
 	}
 
 	ns->c_sock_close();
 	delete ns;
+	delete map;
 	return 0;
 }
