@@ -49,7 +49,7 @@ int c_sock :: c_sock_bind()
 
 int c_sock :: c_sock_listen()
 {
-	listen(this->sock, 10);
+	listen(this->sock, 128);
 }
 
 int c_sock :: c_sock_accept()

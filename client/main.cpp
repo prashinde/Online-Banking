@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 	w_ctx->rate = rate;
 	w_ctx->ip_addr = argv[3];
 	w_ctx->port = atoi(argv[4]);
+	w_ctx->id = atoi(argv[6]);
 	thread t2(connector, w_ctx);
 	t1.join();
 	t2.join();

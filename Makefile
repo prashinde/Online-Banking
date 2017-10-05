@@ -1,5 +1,6 @@
 EXEC := server client
 BIN_DIR := bin
+LOG_DIR := log
 MKDIR_P := mkdir -p 
 
 s_INCLUDE_DIRS := server utils
@@ -30,6 +31,7 @@ ${BIN_DIR}:
 	@echo $(CPPFLAGS) $(cs_LIBRARIES)
 	@echo $(cs_LIBRARIES)
 	${MKDIR_P} ${BIN_DIR}
+	${MKDIR_P} ${LOG_DIR}
 
 server: $(s_OBJS)
 	$(CC) $(s_OBJS) -o $(BIN_DIR)/$@ $(cs_LIBRARIES)

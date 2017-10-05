@@ -10,20 +10,26 @@ public:
 	void c_sock_close();
 };*/
 
-#define LOGNAME_FORMAT "log/%Y%m%d_%H%M%S"
-#define LOGNAME_SIZE 20
-
-int start_transactions(c_queue *q, c_sock *ns, int rate)
+int start_transactions(c_queue *q, c_sock *ns, int rate, int id)
 {
 	int wait = 0;
 	time_t t = time(0);
-	char perf_f[128];
-	strftime(perf_f, sizeof(perf_f), LOGNAME_FORMAT, localtime(&t));
-
+	char perf_f[128] = "../log/client_log";
+	char unique_id[4];
 	ofstream per_rec_f;
 
+	snprintf(unique_id, 4, "%d", id);
+	strncat(perf_f, unique_id, 4);
+
+	cr_log << "File Name:" << perf_f << endl;
 	per_rec_f.open(perf_f);
 
+	if(!per_rec_f.is_open()) {
+		cr_log<< "Log file open failed:" << errno << endl;
+	}
+
+	int nr_trans = 0;
+	double total_time = 0;
 	while(1) {
 		c_trans_t *t = q->remove_trans();
 
@@ -37,6 +43,9 @@ int start_transactions(c_queue *q, c_sock *ns, int rate)
 
 		if(wait != (0UL-1UL))
 			sleep(wait);
+		struct timespec start, finish;
+		double elapsed;
+		clock_gettime(CLOCK_MONOTONIC, &start);
 		//cr_log << "Wait over sendindg to server " << endl;
 		ns->c_sock_write((void *)t, sizeof(c_trans_t));
 		
@@ -58,9 +67,18 @@ int start_transactions(c_queue *q, c_sock *ns, int rate)
 			delete t;
 			continue;
 		}
+
+		clock_gettime(CLOCK_MONOTONIC, &finish);
+		elapsed = (finish.tv_sec - start.tv_sec);
+		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+		total_time += elapsed;
+		nr_trans++;
 		per_rec_f <<"Transaction:" << op_str(t->ct_op) << " AccountNo:"<< t->ct_acc_num << " Status:" << t->ct_status \
 		<<" Old Balance:" << t->ct_o_balance <<" Amount:"<< t->ct_amount << " New Balace:" << t->ct_n_balance << endl;
+		cr_log << "Trans " << nr_trans << " complete " << "Elapsed: "<< elapsed << endl;
 	}
+
+	per_rec_f << "Average time per transaction:" << (total_time/nr_trans) << endl;
 	per_rec_f.close();
 	return 0;
 }
@@ -93,7 +111,7 @@ void * connector(void *arg)
 		return NULL;
 	}
 
-	start_transactions(q, ns, rate);
+	start_transactions(q, ns, rate, w_ctx->id);
 	ns->c_sock_close();
 	delete ns;
 	return NULL;

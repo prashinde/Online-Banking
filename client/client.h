@@ -6,6 +6,9 @@
 #include <mutex>
 #include <iostream>
 #include <fstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <condition_variable>
 
 #include "sock.h"
@@ -35,6 +38,7 @@ typedef struct writer_ctx {
 	int rate;
 	char *ip_addr;
 	int port;
+	int id;
 } writer_ctx_t;
 void *parse_file(void *arg);
 void *connector(void *arg);
