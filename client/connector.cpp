@@ -84,7 +84,7 @@ int start_transactions(c_queue *q, c_sock *ns, int rate, int id, int mult)
 		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
 		total_time += elapsed;
 		nr_trans++;
-		per_rec_f <<"Transaction:" << op_str(t->ct_op) << " AccountNo:"<< t->ct_acc_num << " Status:" << t->ct_status \
+		per_rec_f <<fixed<<"Transaction:" << op_str(t->ct_op) << " AccountNo:"<< t->ct_acc_num << " Status:" << t->ct_status \
 		<<" Old Balance:" << t->ct_o_balance <<" Amount:"<< t->ct_amount << " New Balace:" << t->ct_n_balance << endl;
 		cr_log << "Trans " << nr_trans << " complete " << "Elapsed: "<< elapsed << endl;
 	}

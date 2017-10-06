@@ -76,8 +76,8 @@ void Create_TestCase1()
     srand(time(NULL));
     PORT_NUM=rand()%10000+1000;
     std::string script="#!/bin/bash\n\n";
-    script+="./server ./CASE1/Records.txt 127.0.0.1 "+std::to_string(12345)+" "+std::to_string(0)+" "+std::to_string(0)+" &";
-    script+="(sleep 2; ./client ./CASE1/Transactions.txt 2000 "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(1)+" "+std::to_string(1000)+" "+std::to_string(1)+" &";
+    script+="./server ./CASE1/Records.txt "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(0)+" "+std::to_string(0)+" &";
+    script+="(sleep 2; ./client ./CASE1/Transactions.txt 2000 "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(1)+" "+std::to_string(1000)+" "+std::to_string(1)+" &)";
  
     std::ofstream s_out("./case1.sh");
     s_out<<script<<std::endl;
@@ -117,7 +117,6 @@ void Create_TestCase2()
     //one server, two client, the result should be $10000 for both accounts.
     PORT_NUM=rand()%10000+2000;
     std::string script="#!/bin/bash\n\n";
-    script+="./server ./CASE2/Records.txt 127.0.0.1"+std::to_string(12345)+" "+std::to_string(0)+" "+std::to_string(0)+" &";
     
     struct ifaddrs *addrs;
     getifaddrs(&addrs);
@@ -138,8 +137,9 @@ void Create_TestCase2()
         address="127.0.0.1";
     }
     
-    script+="(sleep 2; ./client ./CASE2/Transactions.txt 2000 "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(1)+" "+std::to_string(1000)+" "+std::to_string(1)+" &";
-    script+="(sleep 2; ./client ./CASE2/Transactions.txt 2000 "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(1)+" "+std::to_string(1000)+" "+std::to_string(2)+" &";
+    script+="./server ./CASE2/Records.txt "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(0)+" "+std::to_string(0)+" &";
+    script+="(sleep 2; ./client ./CASE2/Transactions.txt 2000 "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(1)+" "+std::to_string(1000)+" "+std::to_string(1)+" )&";
+    script+="(sleep 2; ./client ./CASE2/Transactions.txt 2000 "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(1)+" "+std::to_string(1000)+" "+std::to_string(2)+" &)";
     
     std::ofstream s_out("./case2.sh");
     s_out<<script<<std::endl;
@@ -314,13 +314,13 @@ void Create_TestCase4()
 std::string create_running_for(int clientId,int process_num,double timestep,std::string address,std::string dir)
 {
     std::string script="#!/bin/bash\n\n";
-    script+="./server "+dir+"/Records.txt "+address+std::to_string(PORT_NUM)+" "+std::to_string(0)+" "+std::to_string(0)+"&";
+    script+="./server "+dir+"/Records.txt "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(0)+" "+std::to_string(0)+"&";
     int id=0;
     for(int i=0;i<process_num-1;++i){
-        script+="(sleep 2; ./client "+dir+"/Transactions.txt 2000 "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(1)+" "+std::to_string(1000)+" "+std::to_string(id)+" &";
+        script+="(sleep 2; ./client "+dir+"/Transactions.txt 2000 "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(1)+" "+std::to_string(1000)+" "+std::to_string(id)+" )&";
         id++;
     }
-         script+="(sleep 2; ./client "+dir+"/Transactions.txt 2000 "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(1)+" "+std::to_string(1000)+" "+std::to_string(id) +" &";
+         script+="(sleep 2; ./client "+dir+"/Transactions.txt 2000 "+address+" "+std::to_string(PORT_NUM)+" "+std::to_string(1)+" "+std::to_string(1000)+" "+std::to_string(id) +" &)";
  
     return script;
 }

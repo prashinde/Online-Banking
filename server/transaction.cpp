@@ -28,7 +28,7 @@ int CT_client(c_trans_t *t, cr_rec_t *cr)
 	switch(t->ct_op) {
 	case WITHDRAW:
 		o_balance = cr->cr_balance;
-		if((cr->cr_balance - t->ct_amount) <= MIN_FUND) {
+		if((cr->cr_balance - t->ct_amount) < MIN_FUND) {
 			t->ct_status = INS_FUND;
 			cr_log << "Insufficient funds" << endl;
 		} else {
