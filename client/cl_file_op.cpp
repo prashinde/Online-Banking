@@ -92,7 +92,7 @@ int parse_line(stringstream &ss, char *f, c_queue *q)
 	}
 
 	trans->ct_id = g_trans;
-	print_trans(trans, nullptr);
+	//print_trans(trans, nullptr);
 	q->insert_trans(trans);
 	g_trans++;
 	return 0;

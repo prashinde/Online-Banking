@@ -1,0 +1,46 @@
+#compiler
+CC = g++
+
+CFLAGS = -g -Wall -c
+
+
+all : server client test_generator
+
+server : main_s.o BankServer.o shared_datatype.o
+	g++ -pthread main_s.o BankServer.o shared_datatype.o -o server
+
+client : main_c.o Client.o shared_datatype.o
+	g++ main_c.o Client.o shared_datatype.o -o client
+
+test_generator : main_t.o TestRunner.o
+	g++ main_t.o TestRunner.o -o test_generator
+
+test_generators2m : main_ts2m.o TestRunner.o
+	g++ main_ts2m.o TestRunner.o -o test_generator
+
+main_s.o : main_tt.cpp
+	g++ -DSERVER -std=c++11 $(CFLAGS) main_tt.cpp -o main_s.o
+
+main_c.o : main_tt.cpp
+	g++ -DCLIENT -std=c++11 $(CFLAGS) main_tt.cpp -o main_c.o
+
+main_t.o : main_tt.cpp TestRunner.o
+	g++ -DTEST -std=c++11 $(CFLAGS) main_tt.cpp -o main_t.o
+
+main_ts2m.o : main_tt.cpp TestRunner.o
+	g++ -DTEST -DS2M -std=c++11 $(CFLAGS) main_tt.cpp -o main_ts2m.o
+
+BankServer.o : BankServer.cpp
+	g++ -std=c++11 $(CFLAGS) BankServer.cpp shared_datatype.cpp
+
+Client.o : Client.cpp 
+	g++ -std=c++11 $(CFLAGS) Client.cpp
+
+shared_datatype.o : shared_datatype.cpp
+	g++ -std=c++11 $(CFLAGS) shared_datatype.cpp
+
+TestRunner.o : TestRunner.cpp
+	g++ -std=c++11 $(CFLAGS) TestRunner.cpp
+
+clean :
+	rm -rf *.o *.sh case3_filelist.txt case4_filelist.txt client server test_generator CASE1 CASE2 CASE3 CASE4

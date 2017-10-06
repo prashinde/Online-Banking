@@ -43,5 +43,6 @@ void parse_file(char *file, unordered_map<unsigned long, cr_rec_t *> *map);
 int parse_line(stringstream &ss, char *f, unordered_map<unsigned long, cr_rec_t *> *map);
 void *transaction(void *arg);
 void *interest_calc(void *arg);
+void print_map(unordered_map<unsigned long, cr_rec_t *> *m);
 void CT(trans_t *t, cr_rec_t *r);
 #endif

@@ -72,6 +72,7 @@ void *transaction(void *ctx)
 	con_thread_ctx_t *context = (con_thread_ctx_t *)ctx;
 	c_sock *ns = context->ns;
 	int fd = context->fd;
+	unsigned long cnt = 0;
 	unordered_map<unsigned long, cr_rec_t*> *map = context->map;
 	while(1) {
 		c_trans_t *t = new c_trans_t;
@@ -124,8 +125,10 @@ void *transaction(void *ctx)
 		ct->u.t_u_ct = t;
 		CT(ct, got->second);
 		
-		cr_log << "Operation:" << op_str(t->ct_op) << " cr:" << t->ct_acc_num << " Old Balance:" << t->ct_o_balance \
-	 	<< " Amount:" << t->ct_amount << " New Balance:" << t->ct_n_balance << " status:" << t->ct_status << endl;
+		cnt++;
+		/*cr_log << "Operation:" << op_str(t->ct_op) << " cr:" << t->ct_acc_num << " Old Balance:" << t->ct_o_balance \
+	 	<< " Amount:" << t->ct_amount << " New Balance:" << t->ct_n_balance << " status:" << t->ct_status << endl;*/
+		cr_log << "Trans " << cnt << " completed" << endl;
 		//cr_log << "Transaction done writing to socket" << endl;
 		ret = ns->c_sock_write(fd, (void *)t, sizeof(c_trans_t));
 		if(ret == -1) {
@@ -138,6 +141,7 @@ void *transaction(void *ctx)
 		delete t;
 	}
 
+	print_map(map);
 	close(fd);
 	return NULL;
 }

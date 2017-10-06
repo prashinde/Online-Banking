@@ -13,11 +13,16 @@
 
 using namespace std;
 
-void print_map(unordered_map<unsigned long, cr_rec_t *> &m)
+void print_map(unordered_map<unsigned long, cr_rec_t *> *m)
 {
-	for(auto it = m.begin(); it != m.end(); ++it ) {
-		cout << " " << it->first << ":" << it->second;
-		cout << endl;
+	for(auto it = m->begin(); it != m->end(); ++it ) {
+		cr_rec_t *rec = it->second;
+		cr_log << "---------------------------------------------------------------" << endl;
+		cr_log << "Customer id: " << rec->cr_id << endl;
+		cr_log << "Account num:" << rec->cr_account_nr << endl;
+		cr_log << "Name :" << rec->cr_name << endl;
+		cr_log << "Balance :" << rec->cr_balance << endl;
+		cr_log << "---------------------------------------------------------------" << endl;
 	}
 }
 
@@ -93,7 +98,13 @@ int main(int argc, char *argv[])
 	ctx->rate = rate;
 	ctx->sec = sec;
 	ctx->map = map;
-	thread int_thread(interest_calc, ctx);
+
+	if(rate != 0) {
+		thread int_thread(interest_calc, ctx);
+		int_thread.detach();
+	}
+	else
+		delete ctx;
 	/*
 	 * Now we have at least few records to process.
 	 * Accept connections from socket.

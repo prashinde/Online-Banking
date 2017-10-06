@@ -18,6 +18,9 @@ int c_sock :: c_sock_addr(char *ip, int port)
 		return -EINVAL;
 	}
 
+	int optval = 1;
+	setsockopt(this->sock, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
+
 	this->server_addr.sin_port = htons(port);
 	return 0;
 }
