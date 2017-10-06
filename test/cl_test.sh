@@ -6,24 +6,24 @@ rate=$3
 mult=$4
 
 GRAPH_DIR=graph
-rm -rf ../$GRAPH_DIR
-for i in {1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100};
+rm -rf $GRAPH_DIR
+mkdir -p $GRAPH_DIR
+for i in {1,2,3};
 do
-	rm -rf ../log/*
+	rm -rf log
 	for j in `seq 1 $i`
 	do
-		cd ../bin/.
-		./client ../test/ctest 100 $1 $2 $3 $4 $j &
+		../bin/client ctest 100 $1 $2 $3 $4 $j &
 	done
 
 	wait
 
-	cd ../log/.
-	mkdir -p ../$GRAPH_DIR
+	mkdir -p log
+	mv client_log* log/ 
 	#rm -rf ../$GRAPH_DIR/*
 
 	avgtime=0.0
-	for file in ../log/*;
+	for file in log/*;
 	do 
 		line=$(tail -1 $file)
 		number=$(echo $line | cut -d':' -f2)
@@ -32,7 +32,7 @@ do
 	done
 
 	avgtime=$(echo "scale=8;$avgtime/$i"|bc)
-	printf "%d %08.8f\n" "$i" "$avgtime" >> ../$GRAPH_DIR/graph.plot
-	cd ../$GRAPH_DIR/.
+	printf "%d %08.8f\n" "$i" "$avgtime" >> $GRAPH_DIR/graph.plot
 done
+cd $GRAPH_DIR/.
 gnuplot -e "plot 'graph.plot' with lines; pause -1"

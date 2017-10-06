@@ -111,7 +111,7 @@ void *parse_file(void *arg)
 	fs.open(file);
 	if(fs.fail()) {
 		rc = errno;
-		cr_log << "Unable to open file:" << rc <<endl; 
+		cr_log << "Unable to open file:" << file << ":" << rc <<endl; 
 		return NULL;
 	}
 

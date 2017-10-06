@@ -14,7 +14,7 @@ int start_transactions(c_queue *q, c_sock *ns, int rate, int id, int mult)
 {
 	int wait = 0;
 	time_t t = time(0);
-	char perf_f[128] = "../log/client_log";
+	char perf_f[128] = "client_log";
 	char unique_id[4];
 	ofstream per_rec_f;
 
