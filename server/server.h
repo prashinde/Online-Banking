@@ -34,6 +34,7 @@ typedef struct interest_thread_ctx {
 } int_thread_ctx_t;
 
 typedef struct connector_thread_ctx {
+	int c_id;
 	c_sock *ns;
 	int fd;
 	unordered_map<unsigned long, cr_rec_t*> *map;

@@ -12,7 +12,7 @@ SPROC=$!
 GRAPH_DIR=graph
 rm -rf $GRAPH_DIR
 mkdir -p $GRAPH_DIR
-for i in {1..10};
+for i in {1..3};
 do
 	rm -rf log
 	rm client.log
@@ -51,4 +51,11 @@ kill -9 $SPROC
 rm -rf server.log
 
 cd $GRAPH_DIR/.
+$(dpkg-query -l gnuplot > /dev/null 2>&1)
+r=$?
+if [ $r -eq 0 ]
+then
 gnuplot -e "set title 'Scalability-Response Time Vs. concurrecnt connections';set xlabel'No. Concurrent connections'; set ylabel'Response Time(ms)';plot 'graph.plot' w linespoint, '' with labels; pause -1"
+else
+	echo "GNUPLOT not installed"
+fi

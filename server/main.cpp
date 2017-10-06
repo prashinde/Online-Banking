@@ -109,6 +109,7 @@ int main(int argc, char *argv[])
 	 * Now we have at least few records to process.
 	 * Accept connections from socket.
 	 */
+	int cnt = 0;
 	while(1) {
 		rc = ns->c_sock_accept();
 		if(rc != 0) {
@@ -120,7 +121,8 @@ int main(int argc, char *argv[])
 		if(ctx == NULL) {
 			/* Handle, retry */
 		}
-
+		cnt++;
+		ctx->c_id = cnt;
 		ctx->ns = ns;
 		ctx->fd = fd;
 		ctx->map = map;

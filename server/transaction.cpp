@@ -82,7 +82,6 @@ void *transaction(void *ctx)
 
 		ssize_t exp = sizeof(c_trans_t);
 
-		//cr_log << "About to read from socket" << endl;
 		ssize_t ret = ns->c_sock_read(fd, (void *)t, sizeof(c_trans_t));
 		if(ret == -1) {
 			cr_log << "Error on socket read:" << errno << endl;
@@ -90,7 +89,6 @@ void *transaction(void *ctx)
 			continue;
 		}
 
-		//cr_log << "Read from socket success" << endl;
 		if(ret == 0) {
 			cr_log << "Client closed the connection:" << endl;
 			delete t;
@@ -103,8 +101,7 @@ void *transaction(void *ctx)
 			break;
 		}
 
-		//cr_log << "Not last recoed" << endl;
-		//print_trans(t, nullptr);
+		cr_log << "Data recieved from client:" << context->c_id << endl;
 		unordered_map<unsigned long, cr_rec_t *>::const_iterator got = map->find(t->ct_acc_num);
 		if(got == map->end()) {
 			t->ct_status = NOT_CUST;
@@ -112,7 +109,6 @@ void *transaction(void *ctx)
 			delete t;
 			continue;
 		}
-		//cr_log << "Record exist" << endl;
 
 		trans_t *ct = new trans_t;
 		if(ct == NULL) {
@@ -126,10 +122,9 @@ void *transaction(void *ctx)
 		CT(ct, got->second);
 		
 		cnt++;
-		/*cr_log << "Operation:" << op_str(t->ct_op) << " cr:" << t->ct_acc_num << " Old Balance:" << t->ct_o_balance \
-	 	<< " Amount:" << t->ct_amount << " New Balance:" << t->ct_n_balance << " status:" << t->ct_status << endl;*/
-		cr_log << "Trans " << cnt << " completed" << endl;
-		//cr_log << "Transaction done writing to socket" << endl;
+		cr_log << "Operation:" << op_str(t->ct_op) << " cr:" << t->ct_acc_num << " Old Balance:" << t->ct_o_balance \
+	 	<< " Amount:" << t->ct_amount << " New Balance:" << t->ct_n_balance << " status:" << t->ct_status << endl;
+
 		ret = ns->c_sock_write(fd, (void *)t, sizeof(c_trans_t));
 		if(ret == -1) {
 			cr_log << "Error on socket write:" << errno << endl;
