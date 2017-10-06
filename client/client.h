@@ -39,6 +39,7 @@ typedef struct writer_ctx {
 	char *ip_addr;
 	int port;
 	int id;
+	int mult;
 } writer_ctx_t;
 void *parse_file(void *arg);
 void *connector(void *arg);

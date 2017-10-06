@@ -3,16 +3,17 @@
 ip=$1
 port=$2
 rate=$3
+mult=$4
 
 GRAPH_DIR=graph
 rm -rf ../$GRAPH_DIR
-for i in {1..4};
+for i in {1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100};
 do
 	rm -rf ../log/*
 	for j in `seq 1 $i`
 	do
 		cd ../bin/.
-		./client ../test/ctest 100 $1 $2 $3 $j &
+		./client ../test/ctest 100 $1 $2 $3 $4 $j &
 	done
 
 	wait

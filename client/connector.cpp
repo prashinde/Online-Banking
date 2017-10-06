@@ -10,7 +10,7 @@ public:
 	void c_sock_close();
 };*/
 
-int start_transactions(c_queue *q, c_sock *ns, int rate, int id)
+int start_transactions(c_queue *q, c_sock *ns, int rate, int id, int mult)
 {
 	int wait = 0;
 	time_t t = time(0);
@@ -30,19 +30,22 @@ int start_transactions(c_queue *q, c_sock *ns, int rate, int id)
 
 	int nr_trans = 0;
 	double total_time = 0;
+	unsigned long ticks = 0;
 	while(1) {
 		c_trans_t *t = q->remove_trans();
 
 		//cr_log << "Transaction read" << endl;
 		//cr_log << "Rate " << rate << endl;
-		if(rate == 0)
-			wait = t->ct_timestamp;
-		else
+		if(rate == -1) {
+			wait = t->ct_timestamp - ticks;
+		} else
 			wait = rate;
 		//cr_log << "Wait " << wait << endl;
 
-		if(wait != (0UL-1UL))
-			sleep(wait);
+		if(wait != (0UL-1UL)) {
+			usleep(wait*mult);
+			ticks += wait;
+		}
 		struct timespec start, finish;
 		double elapsed;
 		clock_gettime(CLOCK_MONOTONIC, &start);
@@ -111,7 +114,7 @@ void * connector(void *arg)
 		return NULL;
 	}
 
-	start_transactions(q, ns, rate, w_ctx->id);
+	start_transactions(q, ns, rate, w_ctx->id, w_ctx->mult);
 	ns->c_sock_close();
 	delete ns;
 	return NULL;
