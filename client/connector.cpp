@@ -38,8 +38,9 @@ int start_transactions(c_queue *q, c_sock *ns, int rate, int id, int mult)
 		//cr_log << "Rate " << rate << endl;
 		if(rate == -1) {
 			wait = t->ct_timestamp - ticks;
-		} else
+		} else {
 			wait = rate;
+		}
 		//cr_log << "Wait " << wait << endl;
 
 		if(wait != (0UL-1UL)) {
@@ -50,25 +51,32 @@ int start_transactions(c_queue *q, c_sock *ns, int rate, int id, int mult)
 		double elapsed;
 		clock_gettime(CLOCK_MONOTONIC, &start);
 		//cr_log << "Wait over sendindg to server " << endl;
-		ns->c_sock_write((void *)t, sizeof(c_trans_t));
+		ssize_t ret = ns->c_sock_write((void *)t, sizeof(c_trans_t));
+		if(ret == -1) {
+			cr_log << "Cannot write to the socket:" << errno << endl;
+			delete t;
+			continue;
+		}
 		
 		/*TODO: */
-		if(wait == (0UL-1UL) || t->ct_timestamp == (0UL-1UL))
+		if(wait == (0UL-1UL) || t->ct_timestamp == (0UL-1UL)) {
+			delete t;
 			break;
+		}
 
 		//cr_log << "Waiting from server" << endl;
 		/* Let us wait of server to respond. */
-		ssize_t ret = ns->c_sock_read((void *)t, sizeof(c_trans_t));
+		ret = ns->c_sock_read((void *)t, sizeof(c_trans_t));
 		if(ret == -1) {
 			cr_log << "Error on socket read:" << errno << endl;
 			delete t;
 			continue;
 		}
 
-		if(ret != sizeof(c_trans_t)) {
-			cr_log << "Partial read. Do something:" << endl;
+		if(ret == 0) {
+			cr_log << "Server ended the connection " << endl;
 			delete t;
-			continue;
+			break;
 		}
 
 		clock_gettime(CLOCK_MONOTONIC, &finish);

@@ -90,10 +90,10 @@ void *transaction(void *ctx)
 		}
 
 		//cr_log << "Read from socket success" << endl;
-		if(ret != sizeof(c_trans_t)) {
-			cr_log << "Partial read. Do something:" << endl;
+		if(ret == 0) {
+			cr_log << "Client closed the connection:" << endl;
 			delete t;
-			continue;
+			break;
 		}
 
 		if(t->ct_timestamp == (0UL-1UL)) {
@@ -116,6 +116,8 @@ void *transaction(void *ctx)
 		trans_t *ct = new trans_t;
 		if(ct == NULL) {
 			/* Handle the failure. */
+			delete t;
+			continue;
 		}
 
 		ct->e_t = CLIENT;
@@ -127,7 +129,7 @@ void *transaction(void *ctx)
 		//cr_log << "Transaction done writing to socket" << endl;
 		ret = ns->c_sock_write(fd, (void *)t, sizeof(c_trans_t));
 		if(ret == -1) {
-			cr_log << "Error on socket read:" << errno << endl;
+			cr_log << "Error on socket write:" << errno << endl;
 			delete ct;
 			delete t;
 			continue;
