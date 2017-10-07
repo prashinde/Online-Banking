@@ -27,12 +27,14 @@ typedef struct customer_record {
 	mutex         cr_mx;
 } cr_rec_t;
 
+/* Interest thread context */
 typedef struct interest_thread_ctx {
 	int rate;
 	int sec;
 	unordered_map<unsigned long, cr_rec_t*> *map;
 } int_thread_ctx_t;
 
+/* Connector thread context. It handles the client requests */
 typedef struct connector_thread_ctx {
 	int c_id;
 	c_sock *ns;

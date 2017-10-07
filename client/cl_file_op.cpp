@@ -25,6 +25,9 @@ c_trans_t *cr_dummy()
 	return trans;
 }
 
+/*
+ * Parse a space seperate line.
+ */
 int parse_line(stringstream &ss, char *f, c_queue *q)
 {
 	string s;
@@ -36,6 +39,7 @@ int parse_line(stringstream &ss, char *f, c_queue *q)
 		return -ENOMEM;
 	}
 
+	/* Parse a single line */
 	while(getline(ss, s, ' ')) {
 		i++;
 		switch(i) {
@@ -92,12 +96,16 @@ int parse_line(stringstream &ss, char *f, c_queue *q)
 	}
 
 	trans->ct_id = g_trans;
-	//print_trans(trans, nullptr);
+	/* Transaction is valid. Push it in a queue. */
 	q->insert_trans(trans);
 	g_trans++;
 	return 0;
 }
 
+/*
+ * Parse a file line by line.
+ * Each valid transaction is put in a queue.
+ */
 void *parse_file(void *arg)
 {
 	int      rc;
@@ -115,6 +123,7 @@ void *parse_file(void *arg)
 		return NULL;
 	}
 
+	/* Read line */
 	while(getline(fs, line)) {
 		if(fs.bad()) {
 			rc = errno;
@@ -126,6 +135,7 @@ void *parse_file(void *arg)
 		parse_line(ss, file, q);
 	}
 	
+	/* Dummy transaction to signal everyone to stop */
 	if(fs.eof()) {
 		q->insert_trans(cr_dummy());
 	}

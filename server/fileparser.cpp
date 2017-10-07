@@ -13,6 +13,9 @@ static void print_cust_rec(cr_rec_t *rec, char *f)
 	cr_log << "---------------------------------------------------------------" << endl;
 }
 
+/*
+ * Parse one line
+ */
 int parse_line(stringstream &ss, char *f, unordered_map<unsigned long, cr_rec_t *> *map)
 {
 	string s;
@@ -65,6 +68,9 @@ int parse_line(stringstream &ss, char *f, unordered_map<unsigned long, cr_rec_t 
 	return 0;
 }
 
+/*
+ * Parse a records file and put records in a map
+ */
 void parse_file(char *file, unordered_map<unsigned long, cr_rec_t *> *map)
 {
 	int      rc;

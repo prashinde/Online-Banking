@@ -1,5 +1,9 @@
 #include "server.h"
 
+/*
+ * Handle the transactions coming from server e.g.
+ * interest rate.
+ */
 int CT_server(s_trans_t *t, cr_rec_t *cr)
 {
 	double interest = 0;
@@ -21,6 +25,10 @@ int CT_server(s_trans_t *t, cr_rec_t *cr)
 	lck.unlock();
 }
 
+/*
+ * Handles the transaction coming from client.
+ * Withdraw and Deposit
+ */
 int CT_client(c_trans_t *t, cr_rec_t *cr)
 {
 	double o_balance;
@@ -73,15 +81,16 @@ void *transaction(void *ctx)
 	c_sock *ns = context->ns;
 	int fd = context->fd;
 	unsigned long cnt = 0;
+
 	unordered_map<unsigned long, cr_rec_t*> *map = context->map;
 	while(1) {
+		/* Read transaction from client */
 		c_trans_t *t = new c_trans_t;
 		if(t == NULL) {
 			/* How to handle response */
 		}
 
 		ssize_t exp = sizeof(c_trans_t);
-
 		ssize_t ret = ns->c_sock_read(fd, (void *)t, sizeof(c_trans_t));
 		if(ret == -1) {
 			cr_log << "Error on socket read:" << errno << endl;
@@ -95,6 +104,7 @@ void *transaction(void *ctx)
 			break;
 		}
 
+		/* If dummy record, break the loop, it is bye bye */
 		if(t->ct_timestamp == (0UL-1UL)) {
 			cr_log << "Connection closing fd:" << fd << endl;
 			delete t;
@@ -102,6 +112,7 @@ void *transaction(void *ctx)
 		}
 
 		cr_log << "Data recieved from client:" << context->c_id << endl;
+		/* Lookup  the account number in the hashmap */
 		unordered_map<unsigned long, cr_rec_t *>::const_iterator got = map->find(t->ct_acc_num);
 		if(got == map->end()) {
 			t->ct_status = NOT_CUST;
@@ -110,6 +121,7 @@ void *transaction(void *ctx)
 			continue;
 		}
 
+		/* Create a transaction parent object */
 		trans_t *ct = new trans_t;
 		if(ct == NULL) {
 			/* Handle the failure. */
@@ -117,6 +129,7 @@ void *transaction(void *ctx)
 			continue;
 		}
 
+		/* Assign child object */
 		ct->e_t = CLIENT;
 		ct->u.t_u_ct = t;
 		CT(ct, got->second);
@@ -125,6 +138,7 @@ void *transaction(void *ctx)
 		cr_log << "Operation:" << op_str(t->ct_op) << " cr:" << t->ct_acc_num << " Old Balance:" << t->ct_o_balance \
 	 	<< " Amount:" << t->ct_amount << " New Balance:" << t->ct_n_balance << " status:" << t->ct_status << endl;
 
+		/* Send reply back to the client */
 		ret = ns->c_sock_write(fd, (void *)t, sizeof(c_trans_t));
 		if(ret == -1) {
 			cr_log << "Error on socket write:" << errno << endl;

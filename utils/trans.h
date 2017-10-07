@@ -51,6 +51,12 @@ typedef struct server_trans {
 	int            st_status;
 } s_trans_t;
 
+/*
+ * Parent container for both server and client transactions.
+ * Since, it is advisable that all updates to the transactions are carried
+ * out in a single file, transaction structure is designed.
+ * This enable each type of transaction to be embedded in a global structure.
+ */
 typedef struct transaction {
 	enum evt_type e_t;
 	union {

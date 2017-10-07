@@ -16,6 +16,7 @@
 #include "trans.h"
 using namespace std;
 
+/* Transaction queue */
 class c_queue {
 	queue <c_trans_t *> Q;
 	unsigned int q_max_size;
@@ -28,11 +29,13 @@ public:
 	c_trans_t *remove_trans();
 };
 
+/* Parse thread context */
 typedef struct reader_ctx {
 	char    *filename;
 	c_queue *Q;
 } read_ctx_t;
 
+/* Connector thread context */
 typedef struct writer_ctx {
 	c_queue *Q;
 	int rate;

@@ -63,32 +63,45 @@ int main(int argc, char *argv[])
 	int rate, sec;
 
 	unordered_map<unsigned long, cr_rec_t*> *map;
+
+	/* Some parameters for log and floating point */
     	ios_base::sync_with_stdio(false); 
 	setiosflags(ios::fixed);
-	setprecision(2);
+	setprecision(15);
 
+	if(argc != 5) {
+		cout << "usage ./server <records.txt> <ip-addr> <portno> <rate> <sec>" << endl;
+		cout << "\
+			 1. trans.txt -> Record's file \n \
+			 2. ip-addr -> ip address\n \
+			 3. portno -> port number\n \
+			 4. rate -> Interest rate.\n \
+			 5. sec -> Number of seconds after which interest is to be calculated\n.";
+			return -EINVAL;
+	}
+	/* Hash map */
 	map = new unordered_map<unsigned long, cr_rec_t*>;
 	if(map == NULL) {
 		cr_log << "Database built error" << endl;
 		return -1;
 	}
 
+	/* Read records from the file and create a map */
 	parse_file(argv[1], map);
 	if(map->empty()) {
 		cr_log << "Database built error" << endl;
 		return -1;
 	}
 
-	/* While t1 is building DB, let's complete bookkeeping for socket */
 	c_sock *ns = listener(argv[2], atoi(argv[3]));
 	if(ns == NULL) {
 		cr_log << "unable to listen on a socket" << endl;
 		return rc;
 	}
 	
+	/* Interest calculator thread */
 	rate = atoi(argv[4]);
 	sec = atoi(argv[5]);
-	/* Interest calculator thread */
 	int_thread_ctx_t *ctx = new int_thread_ctx_t;
 	if(ctx == NULL) {
 		cr_log << "Unable to allocate memory" << endl;
@@ -99,16 +112,15 @@ int main(int argc, char *argv[])
 	ctx->sec = sec;
 	ctx->map = map;
 
+	/* If rate is zero do not start the thread. */
 	if(rate != 0) {
 		thread int_thread(interest_calc, ctx);
 		int_thread.detach();
 	}
 	else
 		delete ctx;
-	/*
-	 * Now we have at least few records to process.
-	 * Accept connections from socket.
-	 */
+
+	/* Number of clients */
 	int cnt = 0;
 	while(1) {
 		rc = ns->c_sock_accept();
@@ -119,13 +131,14 @@ int main(int argc, char *argv[])
 		int fd = ns->get_cl_sock();
 		con_thread_ctx_t *ctx = new con_thread_ctx_t;
 		if(ctx == NULL) {
-			/* Handle, retry */
+			/* Handle, retry? */
 		}
 		cnt++;
 		ctx->c_id = cnt;
 		ctx->ns = ns;
 		ctx->fd = fd;
 		ctx->map = map;
+		/* Handle transaction for a client */
 		thread t1(transaction, ctx);
 		t1.detach();
 	}
