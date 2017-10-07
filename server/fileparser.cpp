@@ -84,6 +84,7 @@ void parse_file(char *file, unordered_map<unsigned long, cr_rec_t *> *map)
 		return ;
 	}
 
+	/* Read one line */
 	while(getline(fs, line)) {
 		if(fs.bad()) {
 			rc = errno;

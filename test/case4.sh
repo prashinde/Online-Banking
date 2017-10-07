@@ -55,7 +55,7 @@ $(dpkg-query -l gnuplot > /dev/null 2>&1)
 r=$?
 if [ $r -eq 0 ]
 then
-gnuplot -e "set title 'Scalability-Response Time Vs. concurrecnt connections';set xlabel'No. Concurrent connections'; set ylabel'Response Time(ms)';plot 'graph.plot' w linespoint, '' with labels; pause -1"
+	gnuplot -e "set title 'Scalability-Response Time Vs. Rate';set xlabel'Time between two requests(ms)'; set ylabel'Response Time(ms)';plot 'graph.plot' w linespoint, '' with labels; pause -1"
 else
 	echo "GNUPLOT not installed"
 fi

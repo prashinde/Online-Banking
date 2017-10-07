@@ -12,7 +12,7 @@ SPROC=$!
 GRAPH_DIR=graph
 rm -rf $GRAPH_DIR
 mkdir -p $GRAPH_DIR
-for i in {1..3};
+for i in {1..100};
 do
 	rm -rf log
 	rm client.log

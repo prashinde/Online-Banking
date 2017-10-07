@@ -2,7 +2,9 @@
 #include "trans.h"
 #include "unistd.h"
 
-/* Rate per seconds */
+/*
+ * Calculates the interest on each account per second
+ **/
 void *interest_calc(void *arg)
 {
 	int_thread_ctx_t *ctx = (int_thread_ctx_t *)arg;
