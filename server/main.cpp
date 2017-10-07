@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 	setiosflags(ios::fixed);
 	setprecision(15);
 
-	if(argc != 5) {
+	if(argc != 6) {
 		cout << "usage ./server <records.txt> <ip-addr> <portno> <rate> <sec>" << endl;
 		cout << "\
 			 1. trans.txt -> Record's file \n \

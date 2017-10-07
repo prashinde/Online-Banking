@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 	setiosflags(ios::fixed);
 	setprecision(15);
 
-	if(argc != 7) {
+	if(argc != 8) {
 		cout << "usage ./client <trans.txt> <queue-len> <ip-addr> <portno> <request-rate> <mult> <id>" << endl;
 		cout << "\
 			 1. trans.txt -> Transactions file \n \
